@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pytania</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #1a1a1a;
+    overflow: hidden;
+}
+
+/* ===== SERDUSZKA ===== */
+#hearts {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.heart {
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: #ff0033;         /* mocna, wyrazista czerwień */
+    opacity: 1;             /* pełna widoczność */
+    filter: none;           /* brak przyciemnienia */
+    mix-blend-mode: normal; /* brak mieszania z tłem */
+    animation: float linear infinite;
+    user-select: none;
+    z-index: 9999;          /* najwyższa warstwa */
+    pointer-events: none;   /* kliknięcia przechodzą przez serca */
+}
+
+
+@keyframes float {
+    from { transform: translateY(100vh) scale(1); opacity: 1; }
+    to { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+}
+
+/* ===== EKRANY ===== */
+.screen {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* BOX */
+.question {
+    background: rgba(30,30,30,0.95);
+    color: white;
+    flex-direction: column;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.7);
+}
+
+h1 { margin-bottom: 40px; }
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    color: white;
+    flex-shrink: 0;
+}
+
+#yesBtn {
+    background: #4CAF50;
+    padding: 20px 60px;
+    font-size: 22px;
+}
+
+#noBtn {
+    background: #f44336;
+    width: 130px;
+    height: 60px;
+    font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="hearts"></div>
+
+<div id="questionScreen" class="screen question active">
+    <h1 id="questionText">Zostaniesz moja walentynką?</h1>
+    <div class="buttons">
+        <button id="yesBtn" onclick="yes()">TAK</button>
+        <button id="noBtn" onclick="no()">NIE</button>
+    </div>
+</div>
+
+<div id="imageScreen" class="screen">
+    <img src="https://media.tenor.com/0rKL5dtMPkgAAAAM/monkey.gif" alt="Obrazek" width="50%" height="auto" >
+
+</div>
+
+<script>
+/* ===== SERDUSZKA ===== */
+const heartsContainer = document.getElementById("hearts");
+const heartsCount = 120;
+
+for (let i = 0; i < heartsCount; i++) {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML = "❤";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.fontSize = (20 + Math.random() * 40) + "px";
+    heart.style.animationDuration = (5 + Math.random() * 10) + "s";
+    heart.style.animationDelay = Math.random() * 5 + "s";
+    heartsContainer.appendChild(heart);
+}
+
+/* ===== LOGIKA ===== */
+let step = 0;
+const questions = [
+    "Zostaniesz moja walentynką?",
+    "Nie wiem czy się zrozumieliśmy, pytałem się czy zostaniesz moja walentynką?",
+    "Zastanów się jeszcze raz",
+    "-_-",
+    "Nie chcę Cię naciskać, ALEEEEEEE....",
+    "To już prawie ostatnia szansa",
+    "Zaraz zaczne ci grozić",
+    "No wez nooo",
+    "Ładnie prosze",
+    "Phii",
+    "A może jednak?",
+    "Ostatnia szansa",
+    "No dobra…"
+];
+
+function yes() {
+    const questionText = document.getElementById("questionText");
+    const buttons = document.querySelector(".buttons");
+    const container = document.getElementById("questionScreen");
+
+    questionText.textContent = "NO I SUPER ❤ ";
+    questionText.style.fontSize = "56px";
+    questionText.style.color = "#C41696";
+
+    buttons.style.display = "none";
+    container.style.background = "#0f0f0f";
+    container.style.borderRadius = "0";
+    container.style.width = "100vw";
+    container.style.height = "100vh";
+}
+
+function no() {
+
+    // JEŚLI JEST OSTATNIA SZANSA
+    if (questions[step] === "Ostatnia szansa") {
+        show("imageScreen");
+
+        setTimeout(() => {
+            show("questionScreen");
+            showFinalYes();
+        }, 3000);
+
+        return;
+    }
+
+    step++;
+    if (step >= questions.length) step = questions.length - 1;
+    updateUI();
+}
+
+function updateUI() {
+    document.getElementById("questionText").textContent = questions[step];
+
+    const yesBtn = document.getElementById("yesBtn");
+    const paddingY = 20 + step * 30;
+    const paddingX = 60 + step * 60;
+    const fontSize = 22 + step * 18;
+
+    yesBtn.style.padding = `${paddingY}px ${paddingX}px`;
+    yesBtn.style.fontSize = `${fontSize}px`;
+}
+
+/* ===== EKRAN KOŃCOWY ===== */
+function showFinalYes() {
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const container = document.getElementById("questionScreen");
+    const questionText = document.getElementById("questionText");
+
+    questionText.textContent = "";
+    noBtn.style.display = "none";
+
+    yesBtn.style.width = "100vw";
+    yesBtn.style.height = "100vh";
+    yesBtn.style.fontSize = "48px";
+    yesBtn.style.borderRadius = "0";
+    yesBtn.style.padding = "0";
+
+    container.style.background = "#0f0f0f";
+    container.style.borderRadius = "0";
+}
+
+/* ===== SCREEN SWITCH ===== */
+function show(id){
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+}
+</script>
+
+</body>
+</html>
